@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import multiprocessing
 from PIL import Image
 import os
+import ai_train
 font_path = 'C:/Windows/Fonts/simhei.ttf'
 plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
@@ -47,32 +48,7 @@ defect_types = {
 #         x=x.view(-1,20*20*256)
 #         x=self.dense(x)
 #         return x
-class CNN(torch.nn.Module):
-    def __init__(self):
-        super(CNN, self).__init__()
-        self.conv = torch.nn.Sequential(
-            torch.nn.Conv2d(1, 32, kernel_size=3, padding=1),
-            torch.nn.ReLU(),
-            torch.nn.MaxPool2d(2,2),
-            torch.nn.Conv2d(32, 64, kernel_size=3, padding=1),
-            torch.nn.ReLU(),
-            torch.nn.MaxPool2d(2,2),
-            torch.nn.Conv2d(64, 64, kernel_size=3, padding=1),
-            torch.nn.ReLU(),
-            torch.nn.MaxPool2d(2,2)
-        )
-        self.dense = torch.nn.Sequential(
-            torch.nn.Linear(20*20*64, 256),
-            torch.nn.ReLU(),
-            torch.nn.Dropout(p=0.5),
-            torch.nn.Linear(256, 9)
-        )
-    def forward(self, x):
-        x = self.conv(x)
-        x = x.view(-1, 20*20*64)
-        x = self.dense(x)
-        return x
-net=CNN().to(device)
+net=ai_train.CNN().to(device)
 net.load_state_dict(torch.load('CNN_model.pth'))
 net.eval()
 def test(image_path):
@@ -96,7 +72,7 @@ def test(image_path):
     plt.axis('off')
     plt.show()
 if __name__ == '__main__':
-    folder_path = 'E:/包衣片/20241108训练'
+    folder_path = 'E:/包衣片/origin'
     for filename in os.listdir(folder_path):
         if filename.lower().endswith('.bmp'):
             test(os.path.join(folder_path, filename))
