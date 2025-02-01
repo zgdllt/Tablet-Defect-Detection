@@ -8,7 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-class VggNet(nn.module):
+class VggNet(nn.Module):
     def __init__(self):
         super(VggNet, self).__init__()
         self.conv = torch.nn.Sequential(
