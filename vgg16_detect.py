@@ -30,5 +30,9 @@ image = transforms.ToTensor()(image)
 image = image.unsqueeze(0)
 output = vgg16(image)
 _, predicted = torch.max(output, 1)
+print(output)
 predicted_defect = defect_types[predicted.item()]
-print(f"Predicted defect type: {predicted_defect}")
+if __name__ == '__main__':
+    plt.imshow(image.squeeze().permute(1, 2, 0))
+    plt.title(f"Predicted defect type: {predicted_defect}", fontproperties='SimHei')
+    plt.show()
