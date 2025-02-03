@@ -110,37 +110,38 @@ def plot_metrics(train_losses, test_accuracies):
 
     plt.show()
 # Training loop
-num_epochs = 50
-for epoch in range(num_epochs):
-    vgg16.train()
-    running_loss = 0.0
-    for images, labels in dataloader:
-        images = images.to('cuda')
-        labels = labels.to('cuda')
-        
-        optimizer.zero_grad()
-        outputs = vgg16(images)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-        
-        running_loss += loss.item()
-    train_losses.append(running_loss/len(dataloader))
-    vgg16.eval()
-    correct = 0
-    total = 0
-    with torch.no_grad():
-        for images, labels in testloader:
+if __name__ == '__main__':
+    num_epochs = 50
+    for epoch in range(num_epochs):
+        vgg16.train()
+        running_loss = 0.0
+        for images, labels in dataloader:
             images = images.to('cuda')
             labels = labels.to('cuda')
+            
+            optimizer.zero_grad()
             outputs = vgg16(images)
-            predicted = torch.argmax(outputs, 1)
-            print(predicted)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
-    accuracy = correct / total
-    test_accuracies.append(accuracy)
-    print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss/len(dataloader)}')
-    print(f'Test Accuracy: {accuracy}')
-torch.save(vgg16.state_dict(), 'vgg16_model.pth')
-plot_metrics(train_losses, test_accuracies)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            
+            running_loss += loss.item()
+        train_losses.append(running_loss/len(dataloader))
+        vgg16.eval()
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for images, labels in testloader:
+                images = images.to('cuda')
+                labels = labels.to('cuda')
+                outputs = vgg16(images)
+                predicted = torch.argmax(outputs, 1)
+                print(predicted)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+        accuracy = correct / total
+        test_accuracies.append(accuracy)
+        print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss/len(dataloader)}')
+        print(f'Test Accuracy: {accuracy}')
+    torch.save(vgg16.state_dict(), 'vgg16_model.pth')
+    plot_metrics(train_losses, test_accuracies)
