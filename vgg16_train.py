@@ -31,7 +31,7 @@ class vgg16_(nn.Module):
             nn.Linear(4096, 9)
         )
     def forward(self, x):
-        x = self.features(x)
+        x = self.features(x) 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
         x = self.classifier(x)
@@ -49,7 +49,7 @@ class tablet_dataset(Dataset):
     def __getitem__(self, idx):
         img_name = self.image_filenames[idx]
         img_path = os.path.join(self.image_dir, img_name)
-        image = Image.open(img_path).convert('L')
+        image = Image.open(img_path).convert('RGB')
         annotation = 0
         xml_filename = os.path.splitext(img_name)[0] + '.xml'
         xml_path = os.path.join(self.annotation_dir, xml_filename)
@@ -65,7 +65,6 @@ class tablet_dataset(Dataset):
     
 # Define the image transformations
 image_transform = transforms.Compose([
-    transforms.Grayscale(num_output_channels=3),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5,0.5,0.5], std=[0.5,0.5,0.5])
 ])
@@ -79,9 +78,18 @@ testloader = DataLoader(testdataset, batch_size=32, shuffle=True)
 # Modify the VGG16 model for binary classification
 vgg16 = vgg16_().to('cuda')
 
+# Apply Xavier initialization to the classifier layers
+def initialize_weights(m):
+    if isinstance(m, nn.Linear):
+        nn.init.xavier_uniform_(m.weight)
+        if m.bias is not None:
+            nn.init.constant_(m.bias, 0)
+
+vgg16.classifier.apply(initialize_weights)
+
 # Define the loss function and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(vgg16.parameters(), lr=0.001)
+optimizer = optim.Adam(vgg16.parameters(), lr=0.0001)
 
 # Initialize lists to store loss and accuracy
 train_losses = []
@@ -111,7 +119,7 @@ def plot_metrics(train_losses, test_accuracies):
     plt.show()
 # Training loop
 if __name__ == '__main__':
-    num_epochs = 50
+    num_epochs = 30
     for epoch in range(num_epochs):
         vgg16.train()
         running_loss = 0.0
@@ -136,7 +144,6 @@ if __name__ == '__main__':
                 labels = labels.to('cuda')
                 outputs = vgg16(images)
                 predicted = torch.argmax(outputs, 1)
-                print(predicted)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
         accuracy = correct / total
