@@ -21,18 +21,13 @@ defect_types = {
                 8: "小崩盖"
             }
 model_path = 'vgg16_model.pth'
-image_dir = 'test.png'
 vgg16=vgg16_train.vgg16_()
 vgg16.load_state_dict(torch.load(model_path))
 vgg16.eval()
-image = Image.open(image_dir).convert('RGB')
-image = transforms.ToTensor()(image)
-image = image.unsqueeze(0)
-output = vgg16(image)
-_, predicted = torch.max(output, 1)
-print(output)
-predicted_defect = defect_types[predicted.item()]
-if __name__ == '__main__':
-    plt.imshow(image.squeeze().permute(1, 2, 0))
-    plt.title(f"Predicted defect type: {predicted_defect}", fontproperties='SimHei')
-    plt.show()
+def detect(image):
+    image = transforms.ToTensor()(image)
+    image = image.unsqueeze(0)
+    output = vgg16(image)
+    _, predicted = torch.max(output, 1)
+    predicted_defect = defect_types[predicted.item()]
+    return predicted_defect
