@@ -7,6 +7,7 @@ import ctypes
 import random
 from ctypes import *
 
+
 sys.path.append("../MvImport")
 
 from CameraParams_header import *
@@ -321,11 +322,11 @@ class CameraOperation:
                 # 假设相机输出的为BayerRG格式，根据实际情况调整转换模式
                 raw = np.ctypeslib.as_array(self.buf_save_image, shape=(self.st_frame_info.nFrameLen,))
                 raw = raw.reshape((height, width))
-                rgb_array = cv2.cvtColor(raw, cv2.COLOR_BayerRG2RGB)
+                rgb_array = cv2.cvtColor(raw, cv2.COLOR_BayerRG2BGR)
             else:
                 raw = np.ctypeslib.as_array(self.buf_save_image, shape=(height * width,))
                 gray = raw.reshape((height, width))
-                rgb_array = cv2.cvtColor(gray, cv2.COLOR_GRAY2RGB)
+                rgb_array = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
             
             img = rgb_array
             
@@ -419,6 +420,7 @@ from PyQt5.QtCore import QTimer
 import serial
 from PIL import Image
 import concurrent.futures
+from pymodbus.client import ModbusTcpClient
 
 device=torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -774,7 +776,24 @@ if __name__ == "__main__":
         pth_files = [f for f in os.listdir(model_dir) if f.endswith('.pth')]
         ui.comboModel.clear()
         ui.comboModel.addItems(pth_files)
-
+    # 定义客户端地址和端口号列表，每个客户端用一个字典存储
+    client_list = [
+        {"address": "192.168.1.101", "port": 502},
+        {"address": "192.168.1.102", "port": 502},
+        {"address": "192.168.1.103", "port": 502},
+        {"address": "192.168.1.104", "port": 502},
+        {"address": "192.168.1.105", "port": 502},
+        {"address": "192.168.1.106", "port": 502},
+        {"address": "192.168.1.107", "port": 502},
+        {"address": "192.168.1.108", "port": 502},
+    ]
+    def connect_modbus(addr,port):
+        client=ModbusTcpClient(addr,port=port)
+        client.connect()
+        return client
+    def connect_all_modbus():
+        global clients
+        clients=[connect_modbus(client["address"],client["port"]) for client in client_list]
     # 修改后的加载模型函数，从下拉菜单获取选中模型文件
     def load_model():
         global net  # 模型全局变量
@@ -808,6 +827,7 @@ if __name__ == "__main__":
             _, predicted = torch.max(output, 1)
             if predicted.item() > 0:
                 bus_com(y+75)
+                save_bmp()
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(process_defect, chk)
@@ -815,9 +835,25 @@ if __name__ == "__main__":
         
     def bus_com(y):
         QTimer.singleShot(1000, lambda: print("bus communication triggered with y:", y))
-        
-        
-        
+        if y in range(0, 100):
+            client = clients[0]
+        elif y in range(100, 200):
+            client = clients[1]
+        elif y in range(200, 300):
+            client = clients[2]
+        elif y in range(300, 400):
+            client = clients[3]
+        elif y in range(400, 500):
+            client = clients[4]
+        elif y in range(500, 600):
+            client = clients[5]
+        elif y in range(600, 700):
+            client = clients[6]
+        elif y in range(700, 800):
+            client = clients[7]
+        register_address = 100  # 示例寄存器地址
+        command_value = y % 256  # 根据 y 计算指令值（取模以确保值在 0-255 之间）
+        result = client.write_register(register_address, command_value)
         
     # 定义ROI输入框的回调函数
     def on_roi_changed(text):
