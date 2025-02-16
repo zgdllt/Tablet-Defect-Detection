@@ -821,9 +821,9 @@ if __name__ == "__main__":
             # Ensure indices are within image bounds (optional: add safety checks)
             template = image[y-5:y+155, x-5:x+155]
             template = cv2.cvtColor(template, cv2.COLOR_BGR2RGB)
-            template = torch.from_numpy(template).float().to(device)
-            template = template.permute(2, 0, 1)
-            template = template.unsqueeze(0)
+            template = transforms.ToPILImage()(template)
+            template = transforms.Normalize(mean=[0.5,0.5,0.5], std=[0.5, 0.5, 0.5])(template)
+            template = template.unsqueeze(0).to(device)
             output = net(template)
             _, predicted = torch.max(output, 1)
             if predicted.item() > 0:

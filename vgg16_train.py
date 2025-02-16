@@ -69,11 +69,7 @@ image_transform = transforms.Compose([
     transforms.Normalize(mean=[0.5,0.5,0.5], std=[0.5,0.5,0.5])
 ])
 
-# Create the dataset and dataloader
-dataset = tablet_dataset(image_dir='E:\\包衣片\\20241108训练', annotation_dir='E:\\包衣片\\20241108训练', image_transform=image_transform)
-dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-testdataset = tablet_dataset(image_dir='E:\\包衣片\\origin', annotation_dir='E:\\包衣片\\origin', image_transform=image_transform)
-testloader = DataLoader(testdataset, batch_size=32, shuffle=True)
+
 
 # Modify the VGG16 model for binary classification
 vgg16 = vgg16_().to('cuda')
@@ -119,6 +115,11 @@ def plot_metrics(train_losses, test_accuracies):
     plt.show()
 # Training loop
 if __name__ == '__main__':
+    # Create the dataset and dataloader
+    dataset = tablet_dataset(image_dir='E:\\包衣片\\20241108训练', annotation_dir='E:\\包衣片\\20241108训练', image_transform=image_transform)
+    dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
+    testdataset = tablet_dataset(image_dir='E:\\包衣片\\origin', annotation_dir='E:\\包衣片\\origin', image_transform=image_transform)
+    testloader = DataLoader(testdataset, batch_size=32, shuffle=True)
     num_epochs = 30
     for epoch in range(num_epochs):
         vgg16.train()
