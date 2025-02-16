@@ -822,6 +822,7 @@ if __name__ == "__main__":
             template = image[y-5:y+155, x-5:x+155]
             template = cv2.cvtColor(template, cv2.COLOR_BGR2RGB)
             template = torch.from_numpy(template).float().to(device)
+            template = template.permute(2, 0, 1)
             template = template.unsqueeze(0)
             output = net(template)
             _, predicted = torch.max(output, 1)
