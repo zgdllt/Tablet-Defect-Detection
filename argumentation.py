@@ -20,8 +20,6 @@ class tablet_dataset(Dataset):
         img_name = self.image_filenames[idx]
         img_path = os.path.join(self.image_dir, img_name)
         image = Image.open(img_path).convert('L')
-        image = image.resize((160, 160))
-        annotation = 0
         xml_filename = os.path.splitext(img_name)[0] + '.xml'
         xml_path = os.path.join(self.annotation_dir, xml_filename)
         if os.path.exists(xml_path):
@@ -36,22 +34,27 @@ augmentations = [
     transforms.RandomRotation(180),
     transforms.RandomRotation(180),
     transforms.RandomRotation(180),
-    transforms.RandomRotation(180),
-    transforms.RandomRotation(180),
+    # transforms.RandomRotation(180),
+    # transforms.RandomRotation(180),
+    # transforms.RandomRotation(180),
+    # transforms.RandomRotation(180),
+    # transforms.RandomRotation(180),
+    # transforms.RandomRotation(180),
     # transforms.RandomHorizontalFlip(p=1),
     # transforms.RandomVerticalFlip(p=1)
 ]
 
 for i, (image, flag) in enumerate(train_data):
-    for j, transform in enumerate(augmentations):
-        augmented_image = transform(image)
-        augmented_image = transforms.ToPILImage()(augmented_image)
-        augmented_image.save(f'E:\\包衣片\\20241108训练\\rotated_{i}_{j}.bmp')
-        # Save the annotation with the same flag
-        xml_filename = f'rotated_{i}_{j}.xml'
-        xml_path = os.path.join('E:\\包衣片\\20241108训练', xml_filename)
-        tree = ET.ElementTree(ET.Element("annotation"))
-        root = tree.getroot()
-        flags = ET.SubElement(root, "flags")
-        flags.text = flag
-        tree.write(xml_path)
+    if flag == '0':
+        for j, transform in enumerate(augmentations):
+            augmented_image = transform(image)
+            augmented_image = transforms.ToPILImage()(augmented_image)
+            augmented_image.save(f'E:\\包衣片\\20241108训练\\rotatedd_{i}_{j}.bmp')
+            # Save the annotation with the same flag
+            xml_filename = f'rotatedd_{i}_{j}.xml'
+            xml_path = os.path.join('E:\\包衣片\\20241108训练', xml_filename)
+            tree = ET.ElementTree(ET.Element("annotation"))
+            root = tree.getroot()
+            flags = ET.SubElement(root, "flags")
+            flags.text = flag
+            tree.write(xml_path)
